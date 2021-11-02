@@ -6,9 +6,11 @@
   (lambda (varName env)
     (cond
       ((null? env) #f)
+      ((eq? (car env) 'global) (resolve varName (cdr env)))
       ((eq? varName (caar env)) (cadar env))
       (else (resolve varName (cdr env))))))
-
+;(global (a 5) (b 6))
+    
 (define ultra-resolve
   (lambda (varName env)
     (cond
@@ -147,7 +149,7 @@
         
 (define run-parsed-function-code
   (lambda (parsed-no-code-function env)
-    (run-parsed-code (cadr (caddr parsed-no-code-function)) (cdr env))))
+    (run-parsed-code (cadr (caddr parsed-no-code-function)) (list (car env) (car (reverse env))))))
 
            
 (define run-parsed-code
@@ -179,7 +181,7 @@
          (map (lambda (packet) (run-parsed-code (car packet) (cadr packet))) (map (lambda (x) (list x env)) (caddr parsed-no-code)))
          env))))))
 
-(define env '(((age 21) (a 7) (b 5) (c 23))))
-(define sample-no-code '(call (function (a) (call (function (r) a) 10)) 5))
+(define env '((global (a 7))))
+(define sample-no-code '(call (function (a) (call (function (r) a) a)) 5))
 (define parsed-no-code (no-parser sample-no-code))
 (run-parsed-code parsed-no-code env)
